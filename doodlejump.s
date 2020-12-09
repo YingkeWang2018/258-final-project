@@ -28,6 +28,7 @@ Doodle: .word 0x10008BAC
 red: .word 0xff0000
 green: .word 0x00ff00
 white: .word 0xffffff
+lastUnit: .word 0x10008ffc
 
 .text
 main: 	
@@ -161,8 +162,23 @@ REDRAW:
 #Draw the screen
 blez $s6, startRedraw
 addi $s1, $s1, 128
+addi $sp, $sp, -4
+sw $s1, 0($sp)
+jal Check_plat_outbound
+lw $s1, 0($sp)
+addi $sp, $sp, 4
 addi $s2, $s2, 128
+addi $sp, $sp, -4
+sw $s2, 0($sp)
+jal Check_plat_outbound
+lw $s2, 0($sp)
+addi $sp, $sp, 4
 addi $s3, $s3, 128
+addi $sp, $sp, -4
+sw $s3, 0($sp)
+jal Check_plat_outbound
+lw $s3, 0($sp)
+addi $sp, $sp, 4
 addi $s4, $s4, 128
 addi $s6, $s6, -1
 
@@ -192,6 +208,25 @@ sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
 jal SLEEP
 j MainLoop
+
+Check_plat_outbound:
+lw $t0 0($sp)
+addi $sp, $sp, 4
+lw $t1 lastUnit
+slt $t2, $t1, $t0
+blez $t2, exit_plat_outbound
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal Generate_random_pos
+lw $t0 0($sp) #new position
+addi $sp, $sp, 4
+lw $ra 0($sp)
+addi $sp, $sp, 4
+addi $sp, $sp, -4
+exit_plat_outbound:
+sw $t0 0($sp)
+jr $ra
+
 
 DRAWSCREEN:
 addiu  $t0, $zero, 0 #inital counter
@@ -262,10 +297,24 @@ respond_to_k:
 addi $s4, $s4, 4
 j return_keyboard_back
 
+Generate_random_pos:
+li $v0, 42
+li $a0, 0
+li $a1, 25
+syscall
+addi $t0, $zero, 4
+mult $a0, $t0
+mflo $t1
+lw $t0, displayAddress
+add $t0, $t0, $t1
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+jr $ra
+
 
 SLEEP:
 li $v0, 32
-li $a0, 100
+li $a0, 50
 syscall
 jr $ra
 
