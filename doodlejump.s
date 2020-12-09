@@ -25,15 +25,16 @@ platform2: .word 0x10008864
 platform3: .word 0x10008D24
 baseline: .word 0x10008E80
 Doodle: .word 0x10008BAC
+GameEnd: .word 0
 red: .word 0xff0000
 blue: .word 0x33D5FF
 green: .word 0x00ff00
 white: .word 0xffffff
 lastUnit: .word 0x10008ffc
-
+orange: .word 0xffa500
+score: .word 0
 .text
 main: 	
-
 #Draw the screen
 jal DRAWSCREEN
 #Draw Platform 1
@@ -62,17 +63,21 @@ lw $s4, Doodle		#s4: doodle
 addi $sp, $sp, -4
 sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
-addi $s7, $zero, 0 #s7 for game end
 addi $s5, $zero, 20 #s5: vertical move
 addi $s6, $zero, 0 #s6: base offset
 addi $t0, $zero, 0 #score
 addi $sp, $sp, -4
 sw $t0, 0($sp)
 MainLoop:
-beq $s7, $zero, SingleIteration
+lw $t7, GameEnd
+beq $t7, $zero, SingleIteration
+jal DrawEndScreen
 Exit:
 li $v0, 10 # terminate the program gracefully
 syscall
+
+DrawEndScreen:
+
 
 SingleIteration:
 jal DETACT_INPUT
@@ -139,7 +144,21 @@ sw $t0, 0($sp)	#save the score back
 bne $s5, 0, exit_check_doodle_collison
 addi $s5, $s5, 20
 exit_check_doodle_collison:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal check_doodle_outbound
+lw $ra, 0($sp)
+addi $sp, $sp, 4
 j exit_change_doodle_pos
+
+check_doodle_outbound:
+lw $t3 baseline	
+slt $t0, $t3, $s4
+beq $t0, exit_check_doodle_outbound
+sw $t0, GameEnd
+exit_check_doodle_outbound:
+jr $ra
+
 
 
 
@@ -693,6 +712,72 @@ sw $t1, 512($t0)
 sw $t1, 516($t0)
 sw $t1, 520($t0)
 jr $ra
+
+drawE:
+lw $t4, 0($sp) #t4: leftupper corner
+addi $sp, $sp, 4
+lw $t5, orange #t5: color
+addi $t6, $zero, 11 #t6: length
+#draw vertical
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t6, 0($sp)
+jal drawVertical
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#draw first horizontal
+addi $t6, $zero, 5
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t6, 0($sp)
+jal drawHorizontal
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#draw second horizontal
+addi $t6, $zero, 5
+addi $t4, $t4, 640
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t6, 0($sp)
+jal drawHorizontal
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#draw third horizontal
+addi $t6, $zero, 5
+addi $t4, $t4, 640
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t6, 0($sp)
+jal drawHorizontal
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
+
+
+
+
+
 
 drawVertical:
 lw $t0, 0($sp) #t0: number to draw

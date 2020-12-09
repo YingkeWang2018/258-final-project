@@ -1,18 +1,14 @@
 .data
 displayAddress: .word 0x10008000
+foo: .word 10
 blue: .word 0x33D5FF
 .text
 main:
-lw $t0, displayAddress
-addi $t1, $zero, 10 #amount to draw
-addi $sp, $sp, -4
-sw $t0, 0($sp)
-lw $t2, blue
-addi $sp, $sp, -4
-sw $t2, 0($sp)
-addi $sp, $sp, -4
-sw $t1, 0($sp)
-jal drawVertical
+lw $t0, foo
+addi $t0, $t0, 1
+sw $t0, foo
+lw $t1, foo
+addi $t1, $t1, 2
 
 
 
