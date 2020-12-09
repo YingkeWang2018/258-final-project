@@ -65,9 +65,6 @@ sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
 addi $s5, $zero, 20 #s5: vertical move
 addi $s6, $zero, 0 #s6: base offset
-addi $t0, $zero, 0 #score
-addi $sp, $sp, -4
-sw $t0, 0($sp)
 MainLoop:
 lw $t7, GameEnd
 beq $t7, $zero, SingleIteration
@@ -77,6 +74,12 @@ li $v0, 10 # terminate the program gracefully
 syscall
 
 DrawEndScreen:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal drawEND
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
 
 
 SingleIteration:
@@ -96,8 +99,7 @@ jr $ra
 
 check_doodle_collison:
 #check platform 1
-lw $t0, 0($sp) #load score
-addi $sp, $sp, 4
+lw $t0, score #load score
 #check platform 1
 addi $sp, $sp, -4
 sw $ra, 0($sp)
@@ -110,8 +112,7 @@ lw $t0, 0($sp)
 addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
-addi $sp, $sp, -4
-sw $t0, 0($sp)	#save the score back
+sw $t0, score	#save the score back
 #check platform 2
 addi $sp, $sp, -4
 sw $ra, 0($sp)
@@ -124,8 +125,7 @@ lw $t0, 0($sp)
 addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
-addi $sp, $sp, -4
-sw $t0, 0($sp)	#save the score back
+sw $t0, score	#save the score back
 #check platform 3
 addi $sp, $sp, -4
 sw $ra, 0($sp)
@@ -138,8 +138,7 @@ lw $t0, 0($sp)
 addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
-addi $sp, $sp, -4
-sw $t0, 0($sp)	#save the score back
+sw $t0, score	#save the score back
 
 bne $s5, 0, exit_check_doodle_collison
 addi $s5, $s5, 20
@@ -154,13 +153,10 @@ j exit_change_doodle_pos
 check_doodle_outbound:
 lw $t3 baseline	
 slt $t0, $t3, $s4
-beq $t0, exit_check_doodle_outbound
+blez $t0, exit_check_doodle_outbound
 sw $t0, GameEnd
 exit_check_doodle_outbound:
 jr $ra
-
-
-
 
 
 check_platform_collison:
@@ -262,7 +258,7 @@ jal SLEEP
 j MainLoop
 
 DRAWSCORE:
-lw $t0, 0($sp)
+lw $t0, score
 addi $t1, $zero, 10
 div $t0, $t1
 mflo $t2 #10s
@@ -713,106 +709,89 @@ sw $t1, 516($t0)
 sw $t1, 520($t0)
 jr $ra
 
-drawE:
-lw $t4, 0($sp) #t4: leftupper corner
-addi $sp, $sp, 4
-lw $t5, orange #t5: color
-addi $t6, $zero, 11 #t6: length
-#draw vertical
-addi $sp, $sp, -4
-sw $ra, 0($sp)
-addi $sp, $sp, -4
-sw $t4, 0($sp)
-addi $sp, $sp, -4
-sw $t5, 0($sp)
-addi $sp, $sp, -4
-sw $t6, 0($sp)
-jal drawVertical
-lw $ra, 0($sp)
-addi $sp, $sp, 4
-#draw first horizontal
-addi $t6, $zero, 5
-addi $sp, $sp, -4
-sw $ra, 0($sp)
-addi $sp, $sp, -4
-sw $t4, 0($sp)
-addi $sp, $sp, -4
-sw $t5, 0($sp)
-addi $sp, $sp, -4
-sw $t6, 0($sp)
-jal drawHorizontal
-lw $ra, 0($sp)
-addi $sp, $sp, 4
-#draw second horizontal
-addi $t6, $zero, 5
-addi $t4, $t4, 640
-addi $sp, $sp, -4
-sw $ra, 0($sp)
-addi $sp, $sp, -4
-sw $t4, 0($sp)
-addi $sp, $sp, -4
-sw $t5, 0($sp)
-addi $sp, $sp, -4
-sw $t6, 0($sp)
-jal drawHorizontal
-lw $ra, 0($sp)
-addi $sp, $sp, 4
-#draw third horizontal
-addi $t6, $zero, 5
-addi $t4, $t4, 640
-addi $sp, $sp, -4
-sw $ra, 0($sp)
-addi $sp, $sp, -4
-sw $t4, 0($sp)
-addi $sp, $sp, -4
-sw $t5, 0($sp)
-addi $sp, $sp, -4
-sw $t6, 0($sp)
-jal drawHorizontal
-lw $ra, 0($sp)
-addi $sp, $sp, 4
+drawEND:
+lw $t0, displayAddress
+lw $t1, orange
+#draw E
+sw $t1, 1940($t0)
+sw $t1, 1944($t0)
+sw $t1, 1948($t0)
+sw $t1, 1952($t0)
+sw $t1, 1956($t0)
+sw $t1, 2068($t0)
+sw $t1, 2196($t0)
+sw $t1, 2324($t0)
+sw $t1, 2452($t0)
+sw $t1, 2580($t0)
+sw $t1, 2584($t0)
+sw $t1, 2588($t0)
+sw $t1, 2592($t0)
+sw $t1, 2096($t0)
+sw $t1, 2708($t0)
+sw $t1, 2836($t0)
+sw $t1, 2964($t0)
+sw $t1, 3092($t0)
+sw $t1, 3220($t0)
+sw $t1, 3224($t0)
+sw $t1, 3228($t0)
+sw $t1, 3232($t0)
+sw $t1, 3236($t0)
+# draw N
+sw $t1, 1968($t0)
+sw $t1, 2096($t0)
+sw $t1, 2224($t0)
+sw $t1, 2352($t0)
+sw $t1, 2480($t0)
+sw $t1, 2608($t0)
+sw $t1, 2736($t0)
+sw $t1, 2864($t0)
+sw $t1, 2992($t0)
+sw $t1, 3120($t0)
+sw $t1, 3248($t0)
+sw $t1, 2100($t0)
+sw $t1, 2232($t0)
+sw $t1, 2360($t0)
+sw $t1, 2488($t0)
+sw $t1, 2616($t0)
+sw $t1, 2744($t0)
+sw $t1, 2872($t0)
+sw $t1, 3000($t0)
+sw $t1, 3132($t0)
+sw $t1, 3136($t0)
+sw $t1, 3264($t0)
+sw $t1, 3008($t0)
+sw $t1, 2880($t0)
+sw $t1, 2752($t0)
+sw $t1, 2624($t0)
+sw $t1, 2496($t0)
+sw $t1, 2368($t0)
+sw $t1, 2240($t0)
+sw $t1, 2112($t0)
+sw $t1, 1984($t0)
+#Draw D
+sw $t1, 1996($t0)
+sw $t1, 2124($t0)
+sw $t1, 2128($t0)
+sw $t1, 2252($t0)
+sw $t1, 2380($t0)
+sw $t1, 2508($t0)
+sw $t1, 2636($t0)
+sw $t1, 2764($t0)
+sw $t1, 2892($t0)
+sw $t1, 3020($t0)
+sw $t1, 3148($t0)
+sw $t1, 3276($t0)
+sw $t1, 3120($t0)
+sw $t1, 2260($t0)
+sw $t1, 2392($t0)
+sw $t1, 2524($t0)
+sw $t1, 2652($t0)
+sw $t1, 2780($t0)
+sw $t1, 2904($t0)
+sw $t1, 3028($t0)
+sw $t1, 3152($t0)
 jr $ra
 
-
-
-
-
-
-
-drawVertical:
-lw $t0, 0($sp) #t0: number to draw
-addi $sp, $sp, 4
-lw $t1, 0($sp) #t1: color
-addi $sp, $sp, 4
-lw $t2, 0($sp) #t2: start position
-addi $sp, $sp, 4
-addi $t3, $zero, 0 #t3: accumulator
-doVerticalLoop:
-bne $t3, $t0, drawVerticalLoop
-jr $ra
-
-drawVerticalLoop:
-sw $t1, 0($t2)
-addi $t2, $t2, 128
-addi $t3, $t3, 1
-j doVerticalLoop
-
-drawHorizontal:
-lw $t0, 0($sp) #t0: number to draw
-addi $sp, $sp, 4
-lw $t1, 0($sp) #t1: color
-addi $sp, $sp, 4
-lw $t2, 0($sp) #t2: start position
-addi $sp, $sp, 4
-addi $t3, $zero, 0 #t3: accumulator
-doHoritonalLoop:
-bne $t3, $t0, drawHoritonalLoop
-jr $ra
-drawHoritonalLoop:
-sw $t1, 0($t2)
-addi $t2, $t2, 4
-addi $t3, $t3, 1
-j doHoritonalLoop
 
 SLEEP:
 li $v0, 32
