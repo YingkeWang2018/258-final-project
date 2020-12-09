@@ -510,11 +510,11 @@ return_keyboard_back:
 j detact_exit
 
 respond_to_j:
-addi $s4, $s4, -4
+addi $s4, $s4, -8
 j return_keyboard_back
 
 respond_to_k:
-addi $s4, $s4, 4
+addi $s4, $s4, 8
 j return_keyboard_back
 
 Generate_random_pos:
