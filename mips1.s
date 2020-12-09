@@ -3,8 +3,19 @@ displayAddress: .word 0x10008000
 blue: .word 0x33D5FF
 .text
 main:
-addi $t0, $zero, 10
-slti $t1, $t0, 100
+lw $t0, displayAddress
+addi $t1, $zero, 10 #amount to draw
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t2, blue
+addi $sp, $sp, -4
+sw $t2, 0($sp)
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal drawVertical
+
+
+
 
 j exit
 
@@ -192,12 +203,12 @@ bne $t3, $t0, drawVerticalLoop
 jr $ra
 
 drawVerticalLoop:
-lw $t1, 0($t2)
+sw $t1, 0($t2)
 addi $t2, $t2, 128
 addi $t3, $t3, 1
 j doVerticalLoop
 
-drawHoritonal:
+drawHorizontal:
 lw $t0, 0($sp) #t0: number to draw
 addi $sp, $sp, 4
 lw $t1, 0($sp) #t1: color
@@ -209,7 +220,7 @@ doHoritonalLoop:
 bne $t3, $t0, drawHoritonalLoop
 jr $ra
 drawHoritonalLoop:
-lw $t1, 0($t2)
+sw $t1, 0($t2)
 addi $t2, $t2, 4
 addi $t3, $t3, 1
 j doHoritonalLoop

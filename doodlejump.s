@@ -694,7 +694,40 @@ sw $t1, 516($t0)
 sw $t1, 520($t0)
 jr $ra
 
+drawVertical:
+lw $t0, 0($sp) #t0: number to draw
+addi $sp, $sp, 4
+lw $t1, 0($sp) #t1: color
+addi $sp, $sp, 4
+lw $t2, 0($sp) #t2: start position
+addi $sp, $sp, 4
+addi $t3, $zero, 0 #t3: accumulator
+doVerticalLoop:
+bne $t3, $t0, drawVerticalLoop
+jr $ra
 
+drawVerticalLoop:
+sw $t1, 0($t2)
+addi $t2, $t2, 128
+addi $t3, $t3, 1
+j doVerticalLoop
+
+drawHorizontal:
+lw $t0, 0($sp) #t0: number to draw
+addi $sp, $sp, 4
+lw $t1, 0($sp) #t1: color
+addi $sp, $sp, 4
+lw $t2, 0($sp) #t2: start position
+addi $sp, $sp, 4
+addi $t3, $zero, 0 #t3: accumulator
+doHoritonalLoop:
+bne $t3, $t0, drawHoritonalLoop
+jr $ra
+drawHoritonalLoop:
+sw $t1, 0($t2)
+addi $t2, $t2, 4
+addi $t3, $t3, 1
+j doHoritonalLoop
 
 SLEEP:
 li $v0, 32
