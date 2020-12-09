@@ -26,6 +26,7 @@ platform3: .word 0x10008D24
 baseline: .word 0x10008E80
 Doodle: .word 0x10008BAC
 red: .word 0xff0000
+blue: .word 0x33D5FF
 green: .word 0x00ff00
 white: .word 0xffffff
 lastUnit: .word 0x10008ffc
@@ -64,6 +65,9 @@ jal DRAWDOO
 addi $s7, $zero, 0 #s7 for game end
 addi $s5, $zero, 20 #s5: vertical move
 addi $s6, $zero, 0 #s6: base offset
+addi $t0, $zero, 0 #score
+addi $sp, $sp, -4
+sw $t0, 0($sp)
 MainLoop:
 beq $s7, $zero, SingleIteration
 Exit:
@@ -72,6 +76,7 @@ syscall
 
 SingleIteration:
 jal DETACT_INPUT
+
 jal Change_doodle_pos
 j REDRAW
 
@@ -86,29 +91,51 @@ jr $ra
 
 check_doodle_collison:
 #check platform 1
+lw $t0, 0($sp) #load score
+addi $sp, $sp, 4
+#check platform 1
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 addi $sp, $sp, -4
-sw $s1, 0($sp)	
+sw $s1, 0($sp)	#position argument
+addi $sp, $sp, -4
+sw $t0, 0($sp) #score argument
 jal check_platform_collison
+lw $t0, 0($sp)
+addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
+addi $sp, $sp, -4
+sw $t0, 0($sp)	#save the score back
 #check platform 2
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 addi $sp, $sp, -4
-sw $s2, 0($sp)	
+sw $s2, 0($sp)	#position argument
+addi $sp, $sp, -4
+sw $t0, 0($sp) #score argument
 jal check_platform_collison
+lw $t0, 0($sp)
+addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
+addi $sp, $sp, -4
+sw $t0, 0($sp)	#save the score back
 #check platform 3
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 addi $sp, $sp, -4
-sw $s3, 0($sp)	
+sw $s3, 0($sp)	#position argument
+addi $sp, $sp, -4
+sw $t0, 0($sp) #score argument
 jal check_platform_collison
+lw $t0, 0($sp)
+addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
+addi $sp, $sp, -4
+sw $t0, 0($sp)	#save the score back
+
 bne $s5, 0, exit_check_doodle_collison
 addi $s5, $s5, 20
 exit_check_doodle_collison:
@@ -118,6 +145,8 @@ j exit_change_doodle_pos
 
 
 check_platform_collison:
+lw $t6, 0($sp)		#load score
+addi $sp, $sp, 4
 lw $t0, 0($sp)		#platform position
 addi $sp, $sp, 4
 add $t1, $s4, 384	#t1: doodle pos
@@ -136,8 +165,11 @@ div $t3, $t4
 mflo $t4
 blez $t4, exit_check_platform_collison
 addi $s6, $t4, 0
+addi $t6, $t6, 1
 
 exit_check_platform_collison:
+addi $sp, $sp, -4
+sw $t6, 0($sp)
 jr $ra
 
 
@@ -184,6 +216,7 @@ addi $s6, $s6, -1
 
 startRedraw:
 jal DRAWSCREEN
+jal DRAWSCORE
 #Draw Platform 1
 addi $sp, $sp, -4
 sw $s1, 0($sp)
@@ -209,6 +242,193 @@ jal DRAWDOO
 jal SLEEP
 j MainLoop
 
+DRAWSCORE:
+lw $t0, 0($sp)
+addi $t1, $zero, 10
+div $t0, $t1
+mflo $t2 #10s
+mfhi $t3 #1s
+lw $t0, displayAddress
+addi $t4, $t0, 48 #10s start
+addi $t5, $t0, 64 #1s start
+#draw 10s
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t2, 0($sp)
+addi $sp, $sp, -4
+sw $t3, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+addi $sp, $sp, -4
+sw $t2, 0($sp)
+jal DRAWDigit
+lw $t5, 0($sp)
+addi $sp, $sp, 4
+lw $t4, 0($sp)
+addi $sp, $sp, 4
+lw $t3, 0($sp)
+addi $sp, $sp, 4
+lw $t2, 0($sp)
+addi $sp, $sp, 4
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#draw 1s
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t3, 0($sp)
+jal DRAWDigit
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
+
+
+
+DRAWDigit:
+lw $t0, 0($sp) #number
+addi $sp, $sp, 4
+lw $t1, 0($sp)	#start pos
+addi $sp, $sp, 4
+addi $t6, $zero, 0
+slti $t6, $t0, 1
+bgtz $t6, handle0
+slti $t6, $t0, 2
+bgtz $t6, handle1
+slti $t6, $t0, 3
+bgtz $t6, handle2
+slti $t6, $t0, 4
+bgtz $t6, handle3
+slti $t6, $t0, 5
+bgtz $t6, handle4
+slti $t6, $t0, 6
+bgtz $t6, handle5
+slti $t6, $t0, 7
+bgtz $t6, handle6
+slti $t6, $t0, 8
+bgtz $t6, handle7
+slti $t6, $t0, 9
+bgtz $t6, handle8
+j handle9
+drawdigit_exit:
+jr $ra
+
+handle0:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw0
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle1:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw1
+
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle2:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw2
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle3:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw3
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle4:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw4
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle5:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw5
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle6:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw6
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle7:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw7
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle8:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw8
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+handle9:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t1, 0($sp)
+jal draw9
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+j drawdigit_exit
+
+
+
 Check_plat_outbound:
 lw $t0 0($sp)
 addi $sp, $sp, 4
@@ -222,8 +442,8 @@ lw $t0 0($sp) #new position
 addi $sp, $sp, 4
 lw $ra 0($sp)
 addi $sp, $sp, 4
-addi $sp, $sp, -4
 exit_plat_outbound:
+addi $sp, $sp, -4
 sw $t0 0($sp)
 jr $ra
 
@@ -310,6 +530,170 @@ add $t0, $t0, $t1
 addi $sp, $sp, -4
 sw $t0, 0($sp)
 jr $ra
+
+draw0:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 264($t0)
+sw $t1, 384($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra 
+
+draw1:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 128($t0)
+sw $t1, 256($t0)
+sw $t1, 384($t0)
+sw $t1, 512($t0)
+jr $ra 
+
+draw2:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 384($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw3:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw4:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 392($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw5:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw6:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 384($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw7:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 136($t0)
+sw $t1, 264($t0)
+sw $t1, 392($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw8:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 384($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
+draw9:
+lw $t0, 0($sp) #leftupper corner
+addi $sp, $sp, 4
+lw $t1, blue # blue color
+sw $t1, 0($t0)
+sw $t1, 4($t0)
+sw $t1, 8($t0)
+sw $t1, 128($t0)
+sw $t1, 136($t0)
+sw $t1, 256($t0)
+sw $t1, 260($t0)
+sw $t1, 264($t0)
+sw $t1, 392($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 520($t0)
+jr $ra
+
 
 
 SLEEP:

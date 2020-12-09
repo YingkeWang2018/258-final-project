@@ -3,10 +3,9 @@ displayAddress: .word 0x10008000
 blue: .word 0x33D5FF
 .text
 main:
-lw $t1, displayAddress
-addi $sp, $sp, -4
-sw $t1, 0($sp)
-jal draw9
+addi $t0, $zero, 10
+slti $t1, $t0, 100
+
 j exit
 
 
