@@ -23,6 +23,7 @@ displayAddress: .word 0x10008000
 platform1: .word 0x100082B8
 platform2: .word 0x10008864
 platform3: .word 0x10008D24
+baseline: .word 0x10008E80
 Doodle: .word 0x10008BAC
 red: .word 0xff0000
 green: .word 0x00ff00
@@ -61,6 +62,7 @@ sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
 addi $s7, $zero, 0 #s7 for game end
 addi $s5, $zero, 20 #s5: vertical move
+addi $s6, $zero, 0 #s6: base offset
 MainLoop:
 beq $s7, $zero, SingleIteration
 Exit:
@@ -125,6 +127,15 @@ slt $t4, $t1, $t2
 and $t5, $t3, $t4	#t5: collison boolean
 beq $t5, $zero, exit_check_platform_collison
 addi $s5, $zero, 0	#set doodle to stop
+lw $t3 baseline		#load the baseline
+addi $t0, $t0, 4
+sub $t3, $t3, $t0
+addi $t4, $zero, 128
+div $t3, $t4
+mflo $t4
+blez $t4, exit_check_platform_collison
+addi $s6, $t4, 0
+
 exit_check_platform_collison:
 jr $ra
 
@@ -148,6 +159,14 @@ j exit_doodle_jump_up
 
 REDRAW:
 #Draw the screen
+blez $s6, startRedraw
+addi $s1, $s1, 128
+addi $s2, $s2, 128
+addi $s3, $s3, 128
+addi $s4, $s4, 128
+addi $s6, $s6, -1
+
+startRedraw:
 jal DRAWSCREEN
 #Draw Platform 1
 addi $sp, $sp, -4
