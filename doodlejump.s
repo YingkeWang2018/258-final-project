@@ -20,13 +20,14 @@
 
 .data 
 displayAddress: .word 0x10008000
-platform1: .word 0x10008088
-platform2: .word 0x10008880
-platform3: .word 0x10008450
-Doodle: .word 0x10008CD0
+platform1: .word 0x100082B8
+platform2: .word 0x10008864
+platform3: .word 0x10008D24
+Doodle: .word 0x10008BAC
 red: .word 0xff0000
 green: .word 0x00ff00
 white: .word 0xffffff
+
 .text
 main: 	
 
@@ -59,8 +60,7 @@ addi $sp, $sp, -4
 sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
 addi $s7, $zero, 0 #s7 for game end
-addi $s5, $zero, 0 #s5: vertical move
-addi $s6, $zero, 0 #s6: horizontal move
+addi $s5, $zero, 20 #s5: vertical move
 MainLoop:
 beq $s7, $zero, SingleIteration
 Exit:
@@ -73,39 +73,73 @@ jal Change_doodle_pos
 j REDRAW
 
 Change_doodle_pos:
-beq $s5 $zero exit_change_doodle_pos
 bgtz $s5 doodle_jump_up
 blez $s5 doodle_jump_down
-check_horitontal:
-beq $s6 $zero exit_change_doodle_pos
-bgtz $s6 doodle_jump_right
-blez $s6 doodle_jump_left
+check_collison:
+blez $s5 check_doodle_collison
 
 exit_change_doodle_pos:
 jr $ra
 
-doodle_jump_left:
-addi $s4, $s4, -4
-addi $s6, $s6, 1
+check_doodle_collison:
+#check platform 1
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $s1, 0($sp)	
+jal check_platform_collison
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#check platform 2
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $s2, 0($sp)	
+jal check_platform_collison
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#check platform 3
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $s3, 0($sp)	
+jal check_platform_collison
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+bne $s5, 0, exit_check_doodle_collison
+addi $s5, $s5, 20
+exit_check_doodle_collison:
 j exit_change_doodle_pos
 
-doodle_jump_right:
-addi $s4, $s4, 4
-addi $s6, $s6, -1
-j exit_change_doodle_pos
+
+
+
+check_platform_collison:
+lw $t0, 0($sp)		#platform position
+addi $sp, $sp, 4
+add $t1, $s4, 384	#t1: doodle pos
+addi $t2, $t0, 28	#t2: end
+addi $t0, $t0, -4	#t0: start
+slt $t3, $t0, $t1
+slt $t4, $t1, $t2
+and $t5, $t3, $t4	#t5: collison boolean
+beq $t5, $zero, exit_check_platform_collison
+addi $s5, $zero, 0	#set doodle to stop
+exit_check_platform_collison:
+jr $ra
 
 
 doodle_jump_down:
-addi $s4, $s4, 256
-j check_horitontal
+addi $s4, $s4, 128
+j check_collison
 
 
 doodle_jump_up:
-addi $s4, $s4, -256
-addi $s5, $s5, -2
+addi $s4, $s4, -128
+addi $s5, $s5, -1
 beq $s5, $zero change_vertical_direct
 exit_doodle_jump_up:
-j check_horitontal
+j check_collison
 
 change_vertical_direct:
 addi $s5, $s5, -1
@@ -177,7 +211,7 @@ jr $ra
 DRAWPLA: 
 lw $t0 0($sp)	#load the position of the platform
 addi $t1, $zero, 0 #inital i
-addi $t2 $zero, 5 #final counter
+addi $t2 $zero, 7 #final counter
 lw $t3, red #load red
 StartPlatLoop: bne $t1, $t2, PlatLoop
 jr $ra
@@ -202,17 +236,11 @@ return_keyboard_back:
 j detact_exit
 
 respond_to_j:
-bne $s5, $zero, exit_respond_to_j
-addi $s5, $s5, 10
-addi $s6, $zero, -7
-exit_respond_to_j:
+addi $s4, $s4, -4
 j return_keyboard_back
 
 respond_to_k:
-bne $s5, 0, exit_respond_to_k
-addi $s5, $s5, 10
-addi $s6, $zero, 7
-exit_respond_to_k:
+addi $s4, $s4, 4
 j return_keyboard_back
 
 

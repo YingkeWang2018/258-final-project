@@ -1,8 +1,11 @@
 .text
 main:
-addi $t1 $zero, 0
-lw $t8, 0xffff0000
-lw $t2, 0xffff0004
-j main
+addi $s0, $zero, 22
+addi $s1, $zero, 33
+slt $s2, $s0, $s1
+slt $s3, $s0, $s1
+and $s4, $s3, 0x1001
+
+
 li $v0, 10 # terminate the program gracefully
 syscall
