@@ -24,6 +24,7 @@ platform1: .word 0x100082B8
 platform2: .word 0x10008864
 platform3: .word 0x10008D24
 baseline: .word 0x10008E80
+platform3Visible: .word 1
 Doodle: .word 0x10008BAC
 GameEnd: .word 0
 red: .word 0xff0000
@@ -32,7 +33,9 @@ green: .word 0x00ff00
 white: .word 0xffffff
 lastUnit: .word 0x10008ffc
 orange: .word 0xffa500
+brown: .word 0xa0522d
 score: .word 0
+
 platDir: .word 4
 .text
 main: 	
@@ -56,7 +59,7 @@ addi $sp, $sp, 4
 lw $s3, platform3	#s3: platform3
 addi $sp, $sp, -4
 sw $s3, 0($sp)		
-jal DRAWPLA
+jal DRAWPLA3
 lw $s3, 0($sp)
 addi $sp, $sp, 4
 # Draw Doodle
@@ -154,6 +157,8 @@ lw $ra, 0($sp)
 addi $sp, $sp, 4
 sw $t0, score	#save the score back
 #check platform 3
+lw $t4, platform3Visible
+beq $t4, 0, finish_check_platforms
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 addi $sp, $sp, -4
@@ -166,7 +171,7 @@ addi $sp, $sp, 4
 lw $ra, 0($sp)
 addi $sp, $sp, 4
 sw $t0, score	#save the score back
-
+finish_check_platforms:
 bne $s5, 0, exit_check_doodle_collison
 addi $s5, $s5, 20
 exit_check_doodle_collison:
@@ -199,8 +204,10 @@ slt $t4, $t1, $t2
 and $t5, $t3, $t4	#t5: collison boolean
 beq $t5, $zero, exit_check_platform_collison
 addi $s5, $zero, 0	#set doodle to stop
-lw $t3 baseline		#load the baseline
 addi $t0, $t0, 4
+beq $t0, $s3, check_platform3_collison
+check_normal_platform_collison:
+lw $t3, baseline		#load the baseline
 sub $t3, $t3, $t0
 addi $t4, $zero, 128
 div $t3, $t4
@@ -214,6 +221,10 @@ addi $sp, $sp, -4
 sw $t6, 0($sp)
 jr $ra
 
+check_platform3_collison:
+addi $t3, $zero, 0
+sw $t3, platform3Visible
+j check_normal_platform_collison
 
 doodle_jump_down:
 addi $s4, $s4, 128
@@ -275,7 +286,7 @@ addi $sp, $sp, 4
 #Draw Platform 3
 addi $sp, $sp, -4
 sw $s3, 0($sp)		# load s3 back	
-jal DRAWPLA
+jal DRAWPLA3
 lw $s3, 0($sp)
 addi $sp, $sp, 4
 # Draw Doodle
@@ -478,6 +489,8 @@ addi $sp, $sp, 4
 lw $t1 lastUnit
 slt $t2, $t1, $t0
 blez $t2, exit_plat_outbound
+beq $t0, $s3, platform3_reappear
+generate_random_plat:
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 jal Generate_random_pos
@@ -490,6 +503,10 @@ addi $sp, $sp, -4
 sw $t0 0($sp)
 jr $ra
 
+platform3_reappear:
+addi $t4, $zero, 1
+sw $t4, platform3Visible
+j generate_random_plat
 
 DRAWSCREEN:
 addiu  $t0, $zero, 0 #inital counter
@@ -537,6 +554,26 @@ sw $t3, 0($t0)
 addi $t0, $t0, 4
 addi $t1, $t1 ,1
 j StartPlatLoop
+
+DRAWPLA3: 
+lw $t0 0($sp)	#load the position of the platform
+addi $t1, $zero, 0 #inital i
+addi $t2 $zero, 7 #final counter
+lw $t4, platform3Visible
+beq $t4, 0, loadDRAWPLA3white
+lw $t3, brown #load red
+StartPlat3Loop: 
+bne $t1, $t2, Plat3Loop
+jr $ra
+Plat3Loop: 
+sw $t3, 0($t0)
+addi $t0, $t0, 4
+addi $t1, $t1 ,1
+j StartPlat3Loop
+
+loadDRAWPLA3white:
+lw $t3, white
+j StartPlat3Loop
 
 DETACT_INPUT:
 lw $t8, 0xffff0000
