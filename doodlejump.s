@@ -35,6 +35,7 @@ lastUnit: .word 0x10008ffc
 orange: .word 0xffa500
 brown: .word 0xa0522d
 score: .word 0
+awsDisplayed: .word 0
 
 platDir: .word 4
 .text
@@ -298,6 +299,8 @@ j MainLoop
 
 DRAWSCORE:
 lw $t0, score
+beq $t0, 5, handleAwesome
+startDRAWSCORE:
 addi $t1, $zero, 10
 div $t0, $t1
 mflo $t2 #10s
@@ -344,7 +347,24 @@ addi $sp, $sp, 4
 jr $ra
 
 
-
+handleAwesome:
+lw $t1, awsDisplayed
+beq $t1, 1, startDRAWSCORE
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+jal DrawAwesome
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+addi $t1, $zero, 1
+sw $t1, awsDisplayed
+li $v0, 32
+li $a0, 1000
+syscall
+j startDRAWSCORE
 
 DRAWDigit:
 lw $t0, 0($sp) #number
@@ -855,6 +875,244 @@ sw $t1, 2780($t0)
 sw $t1, 2904($t0)
 sw $t1, 3028($t0)
 sw $t1, 3152($t0)
+jr $ra
+
+DrawAwesome:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal DRAWSCREEN
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+lw $t3, displayAddress
+#call drawA
+addi $t4, $t3, 1424
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawA
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawW
+addi $t4, $t3, 1448
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawW
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawe
+addi $t4, $t3, 1344
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawe
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawS
+addi $t4, $t3, 1496
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawS
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawO
+addi $t4, $t3, 1520
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawO
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawM
+addi $t4, $t3, 2716
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawM
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawExpo
+addi $t4, $t3, 2744
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawExpo
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawe
+addi $t4, $t3, 2772
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawe
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
+
+drawA:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange 
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 380($t0)
+sw $t1, 384($t0)
+sw $t1, 388($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 520($t0)
+sw $t1, 632($t0)
+sw $t1, 648($t0)
+sw $t1, 760($t0)
+sw $t1, 776($t0)
+sw $t1, 888($t0)
+sw $t1, 904($t0)
+jr $ra
+
+drawW:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, -8($t0)
+sw $t1, 8($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 512($t0)
+sw $t1, 520($t0)
+sw $t1, 632($t0)
+sw $t1, 640($t0)
+sw $t1, 648($t0)
+sw $t1, 760($t0)
+sw $t1, 768($t0)
+sw $t1, 776($t0)
+sw $t1, 892($t0)
+sw $t1, 900($t0)
+jr $ra
+
+drawe:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 124($t0)
+sw $t1, 128($t0)
+sw $t1, 132($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 380($t0)
+sw $t1, 384($t0)
+sw $t1, 388($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 632($t0)
+sw $t1, 760($t0)
+sw $t1, 892($t0)
+sw $t1, 896($t0)
+sw $t1, 900($t0)
+sw $t1, 776($t0)
+jr $ra
+
+drawS:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 376($t0)
+sw $t1, 504($t0)
+sw $t1, 508($t0)
+sw $t1, 512($t0)
+sw $t1, 516($t0)
+sw $t1, 648($t0)
+sw $t1, 776($t0)
+sw $t1, 892($t0)
+sw $t1, 896($t0)
+sw $t1, 900($t0)
+jr $ra
+
+drawO: 
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 520($t0)
+sw $t1, 632($t0)
+sw $t1, 648($t0)
+sw $t1, 760($t0)
+sw $t1, 776($t0)
+sw $t1, 892($t0)
+sw $t1, 896($t0)
+sw $t1, 900($t0)
+jr $ra
+
+drawM: 
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 4($t0)
+sw $t1, -4($t0)
+sw $t1, 120($t0)
+sw $t1, 128($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 256($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 384($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 520($t0)
+sw $t1, 632($t0)
+sw $t1, 648($t0)
+sw $t1, 760($t0)
+sw $t1, 776($t0)
+jr $ra
+
+drawExpo: 
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 0($t0)
+sw $t1, 128($t0)
+sw $t1, 256($t0)
+sw $t1, 384($t0)
+sw $t1, 512($t0)
+sw $t1, 640($t0)
+sw $t1, 896($t0)
 jr $ra
 
 
