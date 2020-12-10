@@ -34,10 +34,13 @@ white: .word 0xffffff
 lastUnit: .word 0x10008ffc
 orange: .word 0xffa500
 brown: .word 0xa0522d
+grey: .word 0x808080
 score: .word 0
 awsDisplayed: .word 0
 pogDisplayed: .word 0
 wowDisplayed: .word 0
+sheidLeft: 3
+sheidDurLeft: 0
 
 platDir: .word 4
 .text
@@ -186,12 +189,20 @@ addi $sp, $sp, 4
 j exit_change_doodle_pos
 
 check_doodle_outbound:
-lw $t3 baseline	
+lw $t3, lastUnit	
 slt $t0, $t3, $s4
 blez $t0, exit_check_doodle_outbound
+lw $t3, sheidDurLeft
+bgtz $t3, handle_use_sheid
 sw $t0, GameEnd
 exit_check_doodle_outbound:
 jr $ra
+
+handle_use_sheid:
+addi $t3, $zero, 0
+sw $t3, sheidDurLeft
+addi $s5, $s5, 25
+j exit_check_doodle_outbound
 
 
 check_platform_collison:
@@ -272,6 +283,7 @@ addi $s6, $s6, -1
 
 startRedraw:
 jal DRAWSCREEN
+jal DrawSheid
 jal DRAWSCORE
 jal Plat1Move
 #Draw Platform 1
@@ -293,11 +305,38 @@ jal DRAWPLA3
 lw $s3, 0($sp)
 addi $sp, $sp, 4
 # Draw Doodle
+lw $t0, sheidDurLeft
+bgtz $t0, handleDrawDOOAct
 addi $sp, $sp, -4
 sw $s4, 0($sp)		#save position argument
 jal DRAWDOO
+endRedraw:
 jal SLEEP
 j MainLoop
+
+handleDrawDOOAct:
+addi $t0, $t0, -1
+sw $t0, sheidDurLeft
+addi $sp, $sp, -4
+sw $s4, 0($sp)		#save position argument
+jal DRAWDOOActive
+j endRedraw
+
+DrawSheid:
+lw $t0, sheidLeft
+lw $t5, displayAddress
+addi $t5, $t5, 4
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t5, 0($sp)
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+jal DRAWDigit
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
 
 DRAWSCORE:
 lw $t0, score
@@ -583,13 +622,29 @@ addi $t3, $t3, 4
 addi $t0, $t0, 1
 j StartScreenLoop
 
+DRAWDOOActive:
+lw $t0 0($sp) #lode the position into t0
+addi $sp, $sp, 4
+lw $t1, green #load color green into t1
+sw $t1 0($t0)
+addi $t0, $t0, 128
+sw $t1 0($t0)
+addi $t0, $t0, -4
+sw $t1 0($t0)
+addi $t0, $t0, 8
+sw $t1 0($t0)
+addi $t0, $t0, 120
+sw $t1 0($t0)
+addi $t0, $t0, 8
+sw $t1 0($t0)
+jr $ra
 
 
 
 DRAWDOO:
 lw $t0 0($sp) #lode the position into t0
 addi $sp, $sp, 4
-lw $t1, green #load color green into t1
+lw $t1, grey #load color green into t1
 sw $t1 0($t0)
 addi $t0, $t0, 128
 sw $t1 0($t0)
@@ -648,6 +703,7 @@ keyboard_input:
 lw $t2, 0xffff0004
 beq $t2, 0x6A, respond_to_j
 beq $t2, 0x6B, respond_to_k
+beq $t2, 0x69, respond_to_i
 return_keyboard_back:
 j detact_exit
 
@@ -657,6 +713,15 @@ j return_keyboard_back
 
 respond_to_k:
 addi $s4, $s4, 8
+j return_keyboard_back
+
+respond_to_i:
+lw $t2, sheidLeft
+blez $t2, return_keyboard_back
+addi $t2, $t2, -1
+sw $t2, sheidLeft
+addi $t2, $zero, 50
+sw $t2, sheidDurLeft
 j return_keyboard_back
 
 Generate_random_pos:
