@@ -36,6 +36,8 @@ orange: .word 0xffa500
 brown: .word 0xa0522d
 score: .word 0
 awsDisplayed: .word 0
+pogDisplayed: .word 0
+wowDisplayed: .word 0
 
 platDir: .word 4
 .text
@@ -300,6 +302,8 @@ j MainLoop
 DRAWSCORE:
 lw $t0, score
 beq $t0, 5, handleAwesome
+beq $t0, 10, handlePoggers
+beq $t0, 15, handleWow
 startDRAWSCORE:
 addi $t1, $zero, 10
 div $t0, $t1
@@ -362,7 +366,45 @@ addi $sp, $sp, 4
 addi $t1, $zero, 1
 sw $t1, awsDisplayed
 li $v0, 32
-li $a0, 1000
+li $a0, 2500
+syscall
+j startDRAWSCORE
+
+handleWow:
+lw $t1, wowDisplayed
+beq $t1, 1, startDRAWSCORE
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+jal DrawWow
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+addi $t1, $zero, 1
+sw $t1, wowDisplayed
+li $v0, 32
+li $a0, 2500
+syscall
+j startDRAWSCORE
+
+handlePoggers:
+lw $t1, pogDisplayed
+beq $t1, 1, startDRAWSCORE
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t0, 0($sp)
+jal DrawPoggers
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+addi $t1, $zero, 1
+sw $t1, pogDisplayed
+li $v0, 32
+li $a0, 2500
 syscall
 j startDRAWSCORE
 
@@ -958,6 +1000,138 @@ lw $ra, 0($sp)
 addi $sp, $sp, 4
 jr $ra
 
+DrawWow:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal DRAWSCREEN
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+lw $t3, displayAddress
+#call drawW
+addi $t4, $t3, 1424
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawW
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+
+#call drawO
+addi $t4, $t3, 1344
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawO
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+
+#call drawW
+addi $t4, $t3, 1520
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawW
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+
+#call drawExpo
+addi $t4, $t3, 2744
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawExpo
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
+
+
+DrawPoggers:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+jal DRAWSCREEN
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+lw $t3, displayAddress
+#call drawP
+addi $t4, $t3, 1424
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawP
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawO
+addi $t4, $t3, 1448
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawO
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawg
+addi $t4, $t3, 1472
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawg
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawg
+addi $t4, $t3, 1496
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawg
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawe
+addi $t4, $t3, 1520
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawe
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawr
+addi $t4, $t3, 2716
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawr
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call drawExpo
+addi $t4, $t3, 2744
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawExpo
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+#call draws
+addi $t4, $t3, 2772
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+addi $sp, $sp, -4
+sw $t4, 0($sp)
+jal drawS
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+
+
 
 drawA:
 lw $t0, 0($sp)
@@ -1079,6 +1253,53 @@ sw $t1, 896($t0)
 sw $t1, 900($t0)
 jr $ra
 
+drawP:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 4($t0)
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 380($t0)
+sw $t1, 384($t0)
+sw $t1, 388($t0)
+sw $t1, 392($t0)
+sw $t1, 504($t0)
+sw $t1, 632($t0)
+sw $t1, 760($t0)
+sw $t1, 888($t0)
+jr $ra
+
+drawg:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 4($t0)
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 380($t0)
+sw $t1, 384($t0)
+sw $t1, 388($t0)
+sw $t1, 392($t0)
+sw $t1, 520($t0)
+sw $t1, 648($t0)
+sw $t1, 776($t0)
+sw $t1, 888($t0)
+sw $t1, 892($t0)
+sw $t1, 896($t0)
+sw $t1, 900($t0)
+jr $ra
+
 drawM: 
 lw $t0, 0($sp)
 addi $sp, $sp, 4
@@ -1100,6 +1321,24 @@ sw $t1, 632($t0)
 sw $t1, 648($t0)
 sw $t1, 760($t0)
 sw $t1, 776($t0)
+jr $ra
+
+drawr:
+lw $t0, 0($sp)
+addi $sp, $sp, 4
+lw $t1, orange
+sw $t1, 4($t0)
+sw $t1, 0($t0)
+sw $t1, -4($t0)
+sw $t1, 120($t0)
+sw $t1, 136($t0)
+sw $t1, 248($t0)
+sw $t1, 264($t0)
+sw $t1, 376($t0)
+sw $t1, 504($t0)
+sw $t1, 632($t0)
+sw $t1, 760($t0)
+sw $t1, 888($t0)
 jr $ra
 
 drawExpo: 
