@@ -73,6 +73,32 @@ Exit:
 li $v0, 10 # terminate the program gracefully
 syscall
 
+Plat1Move:
+addi $t0, $zero, 128
+div $s1, $t0
+mfhi $t1
+slti $t2, $t1, 5
+beq $t2, 1, plat_move_right
+addi $t0, $zero, 99
+slt $t2, $t0, $t1
+beq $t2, 1, plat_move_left
+exit_PlatMove:
+lw $t0, platDir
+add $s1, $s1, $t0
+jr $ra
+
+
+plat_move_right:
+addi $t0, $zero, 4
+sw $t0, platDir
+j exit_PlatMove
+
+plat_move_left:
+addi $t0, $zero, -4
+sw $t0, platDir
+j exit_PlatMove
+
+
 DrawEndScreen:
 addi $sp, $sp, -4
 sw $ra, 0($sp)
@@ -232,6 +258,7 @@ addi $s6, $s6, -1
 startRedraw:
 jal DRAWSCREEN
 jal DRAWSCORE
+jal Plat1Move
 #Draw Platform 1
 addi $sp, $sp, -4
 sw $s1, 0($sp)
@@ -795,7 +822,7 @@ jr $ra
 
 SLEEP:
 li $v0, 32
-li $a0, 50
+li $a0, 100
 syscall
 jr $ra
 

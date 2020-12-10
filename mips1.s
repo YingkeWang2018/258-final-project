@@ -5,10 +5,10 @@ blue: .word 0x33D5FF
 .text
 main:
 lw $t0, foo
-addi $t0, $t0, 1
-sw $t0, foo
-lw $t1, foo
-addi $t1, $t1, 2
+addi $t3, $zero, 2
+div $t0, $t3
+mflo $t2
+addi $t2, $t2, 0
 
 
 
