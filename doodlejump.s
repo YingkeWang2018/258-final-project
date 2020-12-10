@@ -33,6 +33,7 @@ white: .word 0xffffff
 lastUnit: .word 0x10008ffc
 orange: .word 0xffa500
 score: .word 0
+platDir: .word 4
 .text
 main: 	
 #Draw the screen
